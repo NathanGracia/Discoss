@@ -180,10 +180,6 @@ class MusicCog(commands.Cog):
             asyncio.run_coroutine_threadsafe(self.play_next(guild, channel), self.bot.loop)
 
         vc.play(source, after=after)
-        if channel:
-            await channel.send(
-                embed=self._now_playing_embed(song, len(player.queue))
-            )
 
     def _now_playing_embed(self, song: Song, queue_size: int) -> discord.Embed:
         embed = discord.Embed(
@@ -222,7 +218,7 @@ class MusicCog(commands.Cog):
         try:
             songs = await Song.from_url(query, self.bot.loop, limit=limit)
         except Exception as e:
-            await interaction.followup.send(f"Error fetching audio: {e}")
+            await interaction.followup.send(f"Error fetching audio: {e}", ephemeral=True)
             return
 
         for song in songs:
@@ -233,7 +229,7 @@ class MusicCog(commands.Cog):
         else:
             msg = f"Added **{len(songs)}** songs to queue."
 
-        await interaction.followup.send(msg)
+        await interaction.followup.send(msg, ephemeral=True)
         self._broadcast()
 
         if not vc.is_playing() and not vc.is_paused():
@@ -249,7 +245,7 @@ class MusicCog(commands.Cog):
             return
         vc.stop()
         self._broadcast()
-        await interaction.response.send_message("Skipped.")
+        await interaction.response.send_message("Skipped.", ephemeral=True)
 
     # ── /pause / /resume ─────────────────────────────────────────────────────
 
@@ -261,7 +257,7 @@ class MusicCog(commands.Cog):
             player.on_pause()
             vc.pause()
             self._broadcast()
-            await interaction.response.send_message("Paused.")
+            await interaction.response.send_message("Paused.", ephemeral=True)
         else:
             await interaction.response.send_message("Nothing is playing.", ephemeral=True)
 
@@ -273,7 +269,7 @@ class MusicCog(commands.Cog):
             player.on_resume()
             vc.resume()
             self._broadcast()
-            await interaction.response.send_message("Resumed.")
+            await interaction.response.send_message("Resumed.", ephemeral=True)
         else:
             await interaction.response.send_message("Not paused.", ephemeral=True)
 
@@ -290,7 +286,7 @@ class MusicCog(commands.Cog):
             player._pause_start = None
             await vc.disconnect()
             self._broadcast()
-            await interaction.response.send_message("Stopped and disconnected.")
+            await interaction.response.send_message("Stopped and disconnected.", ephemeral=True)
         else:
             await interaction.response.send_message("Not connected.", ephemeral=True)
 
@@ -320,7 +316,7 @@ class MusicCog(commands.Cog):
             embed.add_field(name="Up next", value="Queue is empty.", inline=False)
 
         embed.set_footer(text=f"Loop: {'on' if player.loop else 'off'} | Volume: {int(player.volume * 100)}%")
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     # ── /nowplaying ──────────────────────────────────────────────────────────
 
@@ -331,7 +327,7 @@ class MusicCog(commands.Cog):
             await interaction.response.send_message("Nothing is playing.", ephemeral=True)
             return
         embed = self._now_playing_embed(player.current, len(player.queue))
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     # ── /volume ──────────────────────────────────────────────────────────────
 
@@ -347,7 +343,7 @@ class MusicCog(commands.Cog):
         if vc and vc.source:
             vc.source.volume = player.volume
         self._broadcast()
-        await interaction.response.send_message(f"Volume set to {level}%.")
+        await interaction.response.send_message(f"Volume set to {level}%.", ephemeral=True)
 
     # ── /loop ────────────────────────────────────────────────────────────────
 
@@ -356,7 +352,7 @@ class MusicCog(commands.Cog):
         player = self.get_player(interaction.guild_id)
         player.loop = not player.loop
         self._broadcast()
-        await interaction.response.send_message(f"Loop {'enabled' if player.loop else 'disabled'}.")
+        await interaction.response.send_message(f"Loop {'enabled' if player.loop else 'disabled'}.", ephemeral=True)
 
     # ── /clear ───────────────────────────────────────────────────────────────
 
@@ -365,7 +361,7 @@ class MusicCog(commands.Cog):
         player = self.get_player(interaction.guild_id)
         player.queue.clear()
         self._broadcast()
-        await interaction.response.send_message("Queue cleared.")
+        await interaction.response.send_message("Queue cleared.", ephemeral=True)
 
 
 async def setup(bot: commands.Bot):
