@@ -199,7 +199,7 @@ class MusicCog(commands.Cog):
         limit="Max songs to load from a playlist (default 100, max 500)",
     )
     async def play(self, interaction: discord.Interaction, query: str, limit: int = 100):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
 
         if not interaction.user.voice:
             await interaction.followup.send("You need to be in a voice channel.", ephemeral=True)
