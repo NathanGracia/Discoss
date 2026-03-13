@@ -22,6 +22,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [OK] Lancement de Discoss...
+echo [OK] Lancement du tunnel Cloudflare...
+start "Cloudflare Tunnel" cloudflared tunnel run discoss
+
+timeout /t 2 /nobreak >nul
+
+echo [OK] Lancement du bot...
 python bot.py
-pause
