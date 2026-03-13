@@ -1,0 +1,9 @@
+services:
+  discoss:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ./cookies.txt:/app/cookies.txt:ro
